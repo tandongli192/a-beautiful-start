@@ -1,0 +1,51 @@
+GitHub 其实就是一个代码托管仓库。
+你可以将代码托管到上面。
+GitHub 上面有一些东西具有一定的参考性。
+比如上面有一些开源的第三方库或者技术，那么用哪种比较好呢？
+可以通过 Stars 数等指标来看。
+
+上传：
+git 将本地代码上传到码云远程仓库步骤：
+1 前提是需要在本地下载一个git进行安装
+2 本机安装第一次使用需要配置基本信息，其中包括用户名和email，
+$ git config --global user.name "Your Name"
+$ git config --global user.email"email@example.com"
+3 其次，需要在码云上创建项目（仓库）
+4 创建好以后，在本地的任意一个位置创建一个本地的仓库，例如在E:/gitworkspace,然后cd E:/gitworkspace 进入该目录下
+5 接着输入git init #初始化 会在gitworkspace下创建一个.git文件夹  ，然后通过git status 查看状态
+6 再然后 通过 git remote add origin 链接（此处的连接是码云中仓库的地址）将本地仓库与码云上的远程仓库关联起来
+7 在准备上传之前，先更新一下项目，确保没有和远程仓库的代码有冲突 git pull --rebase origin master
+8 将要上传的代码复制到本地仓库所在的目录下，用git add . 添加要上传的项目，在提交到本地暂存区，最后将本地项目提交到远程仓库
+其中git add . 是添加目录下所有发生改变的文件
+git commit -m '注释信息' 
+git push -u origin master 会将本地仓库代码提交至远程仓库
+备注：以上三条命令都要按顺序输入
+如果结果显示create 的一串代码，表示上传成功
+
+
+下载：
+新建一目录，从码云上把上传的代码下载下来
+1 因为上面已经新建了一个目录 E:/gitspace ,所以可以之间进入到改目录下
+然后 用命令 git clone 链接（链接为要下载的代码所在的地址）
+
+还原代码到之前的状态，假设文件 为 src/main/main.c：
+1 输入命令 gitlog src/main/main.c 可以得到该文件的commit历史
+2 复制需要回退版本的hash,假设需要回退到 d98a0f565804ba639ba46d6e4295d4f787ff2949 ,则复制该序列即可
+3 命令 git checkout<hash><filename> 来checkout 对应的版本；即 git checkout d98a0f565804ba639ba46d6e4295d4f787ff2949 src/main/main.c
+4 命令git commit -m "revert to previous version" 进行commit checkout 
+
+删除文件夹：
+删除文件夹需要在gitbash进行操作：
+首先输入 $ git remote add origin https://github.com/tandongli192/beautiful-start.git(链接为github上文件所在的仓库链接)
+然后 $ git pull origin master  (将远程仓库里面的项目拉下来)
+接着 通过 $ dir 查看有哪些文件夹
+删除文件夹 $ git rm -r --cached 文件夹名称
+提交删除 $ git commit -m '操作说明' (例如'删除了ETC数仓流程')
+将本次更改更新到github项目上去 $ git push -u origin master 
+操作完成
+备注:本地项目中的target文件夹不受操作影响,删除的只是远程仓库中的文件夹, 可放心删除
+每次增加文件或删除文件，都要commit 然后直接 git push -u origin master，就可以同步到github上了
+
+
+
+

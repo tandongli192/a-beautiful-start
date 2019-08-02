@@ -1,0 +1,4 @@
+pycharm 报错信息中出现需要更新pip的信息时的解决方法：
+1 利用python -m pip install --upgrade pip进行pip 的更新 ，但是会报错，然后在exception出找到当前版本pip所在的地址，删除原先的pip版本和当前更新的pip版本（不要删除pip文件夹）
+2 然后在文件里找到setting，找到project interpreter 可以看到右下角有 Install packaging tool 字样，点击进行安装，安装完成
+3 回到pycharm界面，在命令行界面输入命令 python -m pip install --upgrade pip 则会更新成功

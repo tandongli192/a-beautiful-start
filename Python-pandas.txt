@@ -1,0 +1,284 @@
+1 pandas 下的Series和DataFrame：
+Series:
+a Series 在重置index的时候是会用新的Index匹配原先的index，如果匹配上则取对应的值，如果匹配不上，则会为NaN
+例如：s= a 1
+		 b 2
+		 c 3
+s.reindex(['a','g','t'])
+out: a 1
+     g NaN
+     t NaN
+	 
+以上只是输出了一个新对象，但s本身的索引没有改变
+	 
+a2 series与array类型的不同之处为series有索引，而另一个没有;series中的数据必须是一维的，而array类型不一定
+a3 Series索引可以使用索引值也可以使用位置数值两种方法索引。
+a4 Series切片操作；Series使用标签（索引）切片时，其末端是包含的。Series使用位置数值切片，其末端是不包含。
+a5 Series.loc[索引] 也可用来切片，其中索引可以为单索引也可以为索引范围；Series.iloc[位置索引] 也可用来切片；切片结果特点：如果是单索引或者单个位置索引，得到的结果是对应的单个值，否则得到的结果会包含索引一起显示
+a6 Serirs改值：可以直接在指定位置赋值进行修改，也可用Series.replace(要修改的值（可以为列表），修改为的值（和要修改的值要匹配），inplace=False(是否在原地修改))如果inplace=False,则不会修改原先Series的值，会新产生一个新的Series对象
+a7 Series改索引，直接给索引赋值 也可 用方法rename
+a8 Series 添加多行，生成一个新对象，原先的Series没有变化；但是直接赋值会影响Series(例如上面的s，s['d']=4则s out: a 1 b 2 c 3 d 4)
+Series.append(to_append, ignore_index=False, verify_integrity=False)
+to_append: 另一个Series或多个Series构成的列表；
+ignore_index：False-保留原有索引，True-清除所有索引，生成默认数值索引；
+verify_integrity：True的情况下，如果to_append索引与当前索引有重复，则报错
+a9 Series 删除多行，也是生成一个新对象，不会更改原先的Series
+Series.drop(labels, level=None, inplace=False)
+labels：索引，单索引或索引的列表；
+level：多重索引需要设置；
+inplace：是否本地修改。
+
+DataFrame:
+备注：dataframe取列数据时，可直接df['列名'],但是如果取行数据，需要用到.loc或.iloc,直接df['列标']报错
+a dataFrame按照列标取出来的数据是一个Series类型，例如df 为一个dataFrame,如下
+   A  B  C
+a  1  2  3
+b  4  5  6
+
+1 df[['A','C']]
+OUT:    A  C
+     a  1  3
+     b  4  6
+DataFrame,若data为dict,且不提供行索引，则产生的dataframe的列索引为dict的key
+d dataFrame可以看做具有相同索引的Series按照列排列而成，但是如果Series的索引不一样，则DataFrame的行索引取并集
+	 
+2 位置索引只可以用于取行数据，得到的结果是一个DataFrame
+但是位置索引必须是个范围，单个位置索引会报错，例如df[0]会报错，取0行数据则可用df[0:1];取某列数据可直接用df['列名']；
+a 在知道列名字的情况下，df.loc[index,column] 选取指定行，列的数据;.loc[]，基于索引；
+df.iloc[row_index, column_index]完全用数字来定位，loc[]，基于位置；
+备注：用label就用loc，用position就用iloc。
+3 
+a 改值
+在查的基础上赋值进行修改 或用replace函数，df.replace(to_replace='要替换的值',value='替换后的值',inplace=True(是否原地替换))
+b 改索引
+直接给索引赋值进行直接修改索引
+4 增加值
+a 增加一行，直接赋值操作即可；例如df.loc['c']=[8,2,0] 则 
+df:A  B  C
+a  1  2  3
+b  4  5  6
+c  8  2  0
+
+b 增加多行，pd.concat(objs, axis=0) 其中objs: list of DataFrame，即要连接的两个或多个DataFrame，组成list；axis=0，进行行增加操作。相反增加多列，修改axis=1即可
+5 删除行/列数据
+a 删除多行数据；DataFrame.drop(labels, axis = 0,  level=None, inplace=False)其中 labels 为索引，可为单索引或者索引列表，可为行索引也可以为列索引，axis=0表示删除行，level：是在多重索引的时候需要指定；
+例如：df.drop(['a','c'],axis=0,inplace=True) 
+out:A  B  C
+b  4  5  6
+若 df.drop(['A','C'],axis=1,inplace=True)
+out:B 
+a   2 
+b   5 
+c   2 
+
+b 删除一列直接用 del df['列名']也可用上面的函数
+
+6 行索引和列索引的相互转化
+6.1 普通列和行index的相互转化
+6.1.1 普通列转化为行索引
+DataFrame.set_index(keys,drop=True,append=False,inplace=False);
+keys:要转换的列名或列名列表，若是列名列表，则转化为多层索引
+drop:是否删除原列
+append:是否保留当前索引
+例如 df
+   A  B  C
+a  1  2  3
+b  4  5  6
+ a:
+in: df.set_index('C',drop=False,append=False)
+out:
+   A  B  C
+C         
+3  1  2  3
+6  4  5  6
+注：此时的行索引是3,6,C是行索引的名字
+
+ b:
+in: df.set_index(['A','C'],drop=False,append=False)
+out:
+    A B C
+A C 
+1 3 1 2 3
+4 6	4 5 6
+注：此时的索引是多层索引[[1,4],[3,6]]
+6.1.2 任意列
+适用于任何行数匹配的列表或列表的元组，此方法可以处理多层索引情况，方法是先提取需要的列，构建成元组，再替换索引
+例如：
+in：df.set_index(['c','d'],append=False)
+out:
+   A  B  C
+c  1  2  3
+d  4  5  6
+
+若为多层索引的情况，append=False,则会替换掉所有的索引
+in:df.set_index(keys=['c',d],append=True) 或者 df.set_index([['c',d]],append=True)
+out:
+	 A  B  C
+a c  1  2  3
+b d  4  5  6
+注：上面必须要写keys=列表，否则会将列表当做一列，例如上面的
+
+元组的列表建立多层索引
+list_tuple=[('e','f'),('s','t')]
+in:df.set_index([list_tuple]，append=False)
+out:
+     A  B  C
+e f  1  2  3
+s t  4  5  6
+
+6.2 行索引转化为普通列
+DataFrame.reset_index(level=None,drop=False,inplace=False,col_level=0,col_fill='')
+level:行索引的名字，可为列表，默认包含了所有的行索引
+drop:是否将选定的行索引插入到列中，默认插入
+col_level:如果列索引是多层，那么新插入的列设置在那一层索引
+col_fill:如果有多重索引，除了col_level已经设置的
+6.2.1 单层列索引情况
+df1
+       B
+  A C   
+a 1 3  2
+b 4 6  5
+注：df1 的level=[['a', 'b'], [1, 4], [3, 6]]
+例 
+in:df1.reset_index(level = 1, drop = False) (等价于df1.reset_index(level = 'A', drop = False))
+out:
+    A  B
+  C      
+a 3  1  2
+b 6  4  5
+例:
+in:df1.reset_index(level =[0,1,2], drop = False)
+out：
+  level_0  A  C  B
+0       a  1  3  2
+1       b  4  6  5
+注:上面所有的行索引都转化为列，将生成默认数值索引，如果行索引没有名字，那么生成默认的名字
+6.2.2 多层列索引情况
+例 df
+   one    two
+    A  B   C
+a   1  2   3
+b   4  5   6
+注：多层索引下，若行索引没名字，则变为列之后在列索引的外层生成默认索引 index 
+in:df.reset_index(level=0)
+out:
+   index one    two
+          A  B   C
+0     a   1  2   3
+1     b   4  5   6
+
+in:df.set_names('ab',inplace=True)
+out:df
+   one    two
+    A  B   C
+ab
+a   1  2   3
+b   4  5   6
+
+in:df.reset_index(level=0)
+out:
+     ab  one    two
+          A  B   C
+0     a   1  2   3
+1     b   4  5   6
+
+
+7 DataFrame concat 和 merge 对比：
+a concat 会将所有要连接的dataframe 的索引全部并起来，包括行索引和列索引
+b merge 适用于想在任意列上对齐合并的情况
+b1 pd.merge(left,right,how='inner',on=None,sort=False) 注：本应有多个参数，但只关注左边的即可
+left,right： 两个要对齐合并的DataFrame；
+how：取值left，right，inner，outer
+on：两个dataframe关联的列名
+sort: True or False，是否按字典序重新排序。
+
+Index(索引)：
+A:单层索引
+1 创建索引用pd.Index(data,dtype,name),data为一维列表；dtype为索引元素类型；name 为索引名称，类似于列名
+得到的索引由三部分组成values,name,dtype;所以可以用索引.values,.name,.dtype去访问三部分
+2 查询，其查询方式和Series类似
+3 索引的修改，索引类似于元祖，不可以赋值修改，但是可以修改索引的名称，
+a 直接赋值修改即可
+b 利用函数修改此处的index是Index对象。index.set_names(names,inplace=False)
+4 索引增加行，
+a 按指定位置添加行；利用index.insert(loc,value),loc为位置编号
+b 末尾添加多行；利用index.append(other),other 为其他的索引对象
+注：索引增加行会生成一个新的索引对象，原先的索引不变
+5 索引并，index.union(other),other 为其他的索引对象
+6 删除
+a 按位置删除一行，index.delete(loc)
+b 按索引删除多行，index.drop(labels),labels 是索引列表
+注：删除行的索引会生成一个新的索引对象，原先的索引不变
+7 索引的交；利用index.intersection(other),其中index和other都是索引对象
+B:多层索引
+1.1 创建多层索引用pd.MultiIndex.from_tuples(labels,names=None);labels 为元组或列表的列表，names为名字列表
+1.2 也可用pd.MultiIndex.from_product(labels,names) 
+注：以上两个函数不同之处是label的输入形式不一样
+例如：输出形式如下面的dateFrame的几种方法：
+in :df3
+out:
+python     math        En     
+      期中  期末   期中   期末   期中   期末
+东     39   7   45   20   47  126
+南     68  20   57  103   82    2
+西     95   5   62   15  130   91
+北    136  55   74   27  148   29
+
+方法1,使用数组：df3 = DataFrame(np.random.randint(0,150,size=(4,6)),
+               index = list('东南西北'),
+               columns=[['python','python','math','math','En','En'],['期中','期末','期中','期末','期中','期末']])
+
+方法2,使用tuple：df3 = DataFrame(np.random.randint(0,150,size=(4,6)),
+               index = list('东南西北'),
+               columns =pd.MultiIndex.from_tuples([('python','期中'),('python','期末'),
+                                                  ('math','期中'),('math','期末'),
+                                                  ('En','期中'),('En','期末')]))
+方法3,使用product：df3 = DataFrame(np.random.randint(0,150,size=(4,6)),
+               index = list('东南西北'),
+			   columns = pd.MultiIndex.from_product([['python','math','En'],['期中','期末']]))
+注：方法2,3处 列表的列表可以改为元组的列表，没影响，但是方法1不可以修改
+
+2 查询方法和单层索引一样
+2.1获取某一层的索引：MultiIndex.get_level_values(level),level 是选择的那层
+例如：index.get_level_values(0) 注：上面的MultiIndex是多层索引对象
+
+3 修改索引:
+3.1 修改索引名称。
+用函数.set_names(names,level=NOne,inplace=False);names 为要设置的新名字，可为名字列表；level 需要修改的索引层次，可为列表，要与names匹配
+3.2 修改索引层次顺序。
+MultiIndex.swaplevel(i=-2,j=-1) 修改level i 和level j 的次序
+实用：Series.swaplevel(i=-2,j=-1) DataFrame.swaplevel(i=-2,j=-1,axis=0);axis=0表示行索引
+注：无论索引是多少层，都可以用上面的i,j的值，也可不输入i,j(DataFrame 需要指定行/列)，但是如果是2层以上，则改变的内层的索引，
+
+4 多层索引的使用方法
+4.1 外层索引
+****无论是Series还是DataFrame,外层索引都是可以直接使用，也就是说可以认为只有这一层索引；
+4.2 内层索引。
+内层索引不可直接使用，需要先外层再内层；内层只能使用单索引形式
+例如  df3['Python','期中'] 可以取上面df3的第一列
+例df4为：
+name3         a       b
+name4       one two one
+name1 name2            
+a     one     1   2   3
+      two     4   5   6
+b     one     7   8   9
+in:df4.loc['a','one'] 可以取第一行 
+out:
+name3  name4
+a      one      1
+       two      2
+b      one      3
+
+in:df4.iloc[[0,2],1]
+out:
+name1  name2
+a      one      2
+b      one      8
+
+
+ 
+
+
+
+
